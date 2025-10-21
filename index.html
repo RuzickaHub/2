@@ -5,118 +5,73 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Video Frame Capture</title>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      margin: 0;
       min-height: 100vh;
-      background: linear-gradient(to bottom right, #0f172a, #1e293b);
+      background: linear-gradient(135deg, #0a192f, #1a2a44);
       display: flex;
       justify-content: center;
       align-items: center;
       font-family: Arial, sans-serif;
-      padding: 20px;
+      color: #fff;
     }
     .container {
-      max-width: 700px;
+      max-width: 500px;
       width: 100%;
-      background: #1e293b;
-      border: 1px solid #475569;
-      border-radius: 8px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-      color: white;
+      background: rgba(10, 25, 47, 0.9);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      text-align: center;
     }
     h1 {
       font-size: 24px;
       margin-bottom: 8px;
+      color: #ccd6f6;
     }
     p {
-      color: #94a3b8;
-      margin-bottom: 24px;
+      font-size: 14px;
+      color: #8892b0;
+      margin-bottom: 20px;
     }
     .upload-area {
-      border: 2px dashed #475569;
+      border: 2px dashed #8892b0;
       border-radius: 8px;
-      padding: 24px;
-      text-align: center;
+      padding: 40px 20px;
       cursor: pointer;
       transition: background 0.2s;
-      margin-bottom: 24px;
+      position: relative;
     }
     .upload-area:hover {
-      background: #334155;
-    }
-    .upload-area p {
-      margin: 8px 0;
-      font-size: 14px;
+      background: rgba(136, 146, 176, 0.1);
     }
     .upload-area span {
       font-weight: bold;
-      color: white;
+      color: #ccd6f6;
     }
-    input[type="file"] {
-      display: none;
+    .upload-area p {
+      color: #8892b0;
+      font-size: 12px;
     }
-    video {
-      width: 100%;
-      max-height: 256px;
-      background: black;
-      border-radius: 8px;
-      object-fit: contain;
-      margin-bottom: 12px;
+    .upload-area::before {
+      content: "";
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      width: 1px;
+      height: 30px;
+      background: dashed #8892b0;
+      transform: translateX(-50%);
     }
-    button {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      font-weight: bold;
-      color: white;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: background 0.2s;
-      margin-bottom: 12px;
+    .upload-area .icon {
+      width: 24px;
+      height: 24px;
+      stroke: #ccd6f6;
+      margin-bottom: 10px;
     }
-    button:disabled {
-      background: #475569;
-      cursor: not-allowed;
-    }
-    .capture-btn {
-      background: #2563eb;
-    }
-    .capture-btn:hover:not(:disabled) {
-      background: #1d4ed8;
-    }
-    .download-btn {
-      background: #16a34a;
-    }
-    .download-btn:hover {
-      background: #15803d;
-    }
-    .reset-btn {
-      background: #334155;
-    }
-    .reset-btn:hover {
-      background: #475569;
-    }
-    img {
-      width: 100%;
-      border-radius: 8px;
-      border: 1px solid #475569;
-      margin-bottom: 12px;
-    }
-    canvas {
-      display: none;
-    }
-    .icon {
-      width: 20px;
-      height: 20px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-    }
+    input[type="file"] { display: none; }
+    video, img, canvas { display: none; } /* Skryté prvky, zobrazí se dynamicky přes JavaScript */
   </style>
 </head>
 <body>
@@ -124,32 +79,27 @@
     <h1>Video Frame Capture</h1>
     <p>Extract the last frame from your video and download as PNG</p>
     <label class="upload-area">
-      <!-- Upload Icon (SVG from Lucide) -->
       <svg class="icon" viewBox="0 0 24 24">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="17 8 12 3 7 8"></polyline>
-        <line x1="12" y1="3" x2="12" y2="15"></line>
+        <path d="M12 5v14m7-7H5" fill="none" stroke="currentColor" stroke-width="2"/>
       </svg>
       <span>Choose video file</span>
       <p>MP4, WebM, Ogg, etc.</p>
       <input type="file" id="videoInput" accept="video/*">
     </label>
     <div id="videoSection" style="display: none;">
-      <p id="fileName" style="color: #94a3b8; font-size: 14px; margin-bottom: 12px;"></p>
+      <p id="fileName"></p>
       <video id="videoPlayer" controls></video>
     </div>
     <button id="captureBtn" class="capture-btn" style="display: none;">
-      <!-- Play Icon -->
       <svg class="icon" viewBox="0 0 24 24">
         <polygon points="5 3 19 12 5 21 5 3"></polygon>
       </svg>
       <span id="captureText">Capture Last Frame</span>
     </button>
     <div id="frameSection" style="display: none;">
-      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 12px;">Captured Frame:</p>
+      <p>Captured Frame:</p>
       <img id="frameImage" alt="Captured frame">
       <button id="downloadBtn" class="download-btn">
-        <!-- Download Icon -->
         <svg class="icon" viewBox="0 0 24 24">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
           <polyline points="7 10 12 15 17 10"></polyline>
